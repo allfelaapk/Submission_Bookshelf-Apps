@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
   const formSubmit = document.getElementById('inputBook');
+
   formSubmit.addEventListener('submit', function (e) {
     e.preventDefault();
     addBookData();
@@ -31,16 +32,26 @@ function addBookData() {
   const textBook = document.getElementById('inputBookTitle').value;
   const textAuthor = document.getElementById('inputBookAuthor').value;
   const yearNumber = document.getElementById('inputBookYear').value;
-
   const generateID = generateId();
+  const bookFinished = document.getElementById('inputBookIsComplete');
+
+  let bookStatus;
+
+  if (bookFinished.checked) {
+    bookStatus = true;
+  } else {
+    bookStatus = false;
+  }
+
   const bookDataObject = generatebookDataObject(
     generateID,
     textBook,
     textAuthor,
     yearNumber,
-    false
+    bookStatus
   );
   books.push(bookDataObject);
+  bookFinished.checked = false;
 
   document.dispatchEvent(new Event(RENDER_EVENT));
   saveData();
@@ -56,9 +67,12 @@ document.addEventListener(RENDER_EVENT, function () {
   const completeBooksList = document.getElementById('completeBookshelfList');
   completeBooksList.innerHTML = '';
 
+  // document.addEventListener('click', function () {
+  //   checkBookToCompleted(bookDataObject.id);
+  // });
   for (const bookItem of books) {
     const bookElement = createBook(bookItem);
-    if (!bookItem.isCompleted) {
+    if (!bookItem.isComplete) {
       uncompletedBooksList.append(bookElement);
     } else {
       completeBooksList.append(bookElement);
@@ -85,7 +99,7 @@ function createBook(bookDataObject) {
   container.append(list);
   container.setAttribute('id', `books-${bookDataObject.id}`);
 
-  if (bookDataObject.isCompleted) {
+  if (bookDataObject.isComplete) {
     const undoButton = document.createElement('button');
     undoButton.classList.add('undo-button');
     const textElement3 = document.createElement('p');
@@ -96,17 +110,17 @@ function createBook(bookDataObject) {
       undoBookFromCompleted(bookDataObject.id);
     });
 
-    const trashButton = document.createElement('button');
-    trashButton.classList.add('trash-button');
+    const trashButton1 = document.createElement('button');
+    trashButton1.classList.add('trash-button');
     const textElement2 = document.createElement('p');
     textElement2.textContent = 'hapus buku';
-    trashButton.append(textElement2);
+    trashButton1.append(textElement2);
 
-    trashButton.addEventListener('click', function () {
+    trashButton1.addEventListener('click', function () {
       removeBookFromCompleted(bookDataObject.id);
     });
 
-    container.append(undoButton, trashButton);
+    container.append(undoButton, trashButton1);
   } else {
     const checkButton = document.createElement('button');
     checkButton.classList.add('check-button');
@@ -117,7 +131,17 @@ function createBook(bookDataObject) {
       checkBookToCompleted(bookDataObject.id);
     });
 
-    container.append(checkButton);
+    const trashButton2 = document.createElement('button');
+    trashButton2.classList.add('trash-button');
+    const textElement2 = document.createElement('p');
+    textElement2.textContent = 'hapus buku';
+    trashButton2.append(textElement2);
+
+    trashButton2.addEventListener('click', function () {
+      removeBookFromCompleted(bookDataObject.id);
+    });
+
+    container.append(checkButton, trashButton2);
   }
 
   return container;
@@ -129,7 +153,7 @@ function checkBookToCompleted(bookId) {
 
   if (bookTarget == null) return;
 
-  bookTarget.isCompleted = true;
+  bookTarget.isComplete = true;
   document.dispatchEvent(new Event(RENDER_EVENT));
   saveData();
 }
@@ -169,7 +193,7 @@ function undoBookFromCompleted(bookId) {
   const bookTarget = findBook(bookId);
 
   if (bookTarget == null) return;
-  bookTarget.isCompleted = false;
+  bookTarget.isComplete = false;
   document.dispatchEvent(new Event(RENDER_EVENT));
   saveData();
 }
@@ -211,4 +235,12 @@ function loadDataFromStorage() {
 }
 
 // declare variable for checkbox
-const checkbox = document.querySelector();
+// function completeBookCheck() {
+//   const bookFinished = document.getElementById('inputBookIsComplete').checked;
+//   document.getElementById('inputBookIsComplete').checked = false;
+
+//   if (bookFinished) {
+//     createBook();
+//     checkBookToCompleted();
+//   }
+// }
